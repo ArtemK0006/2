@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="16dp"
+    android:layout_marginBottom="12dp"
+    android:background="@drawable/coupon_bg">
+
+    <ImageView
+        android:id="@+id/imageDish"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:scaleType="centerCrop" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:layout_marginStart="16dp">
+
+        <TextView
+            android:id="@+id/textDishName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Блюдо"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/textDishGoal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Нужно 1000 кликов"
+            android:textColor="#D32F2F"
+            android:layout_marginTop="4dp" />
+
+        <TextView
+            android:id="@+id/textPromoCode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="PROMO1000"
+            android:textColor="#388E3C"
+            android:layout_marginTop="6dp"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/buttonAction"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Получить"
+        android:visibility="gone"
+        android:layout_gravity="center_vertical" />
+
+</LinearLayout>

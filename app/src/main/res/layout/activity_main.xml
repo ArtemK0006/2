@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/a"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:padding="32dp">
+
+    <!-- Счётчик вверху -->
+    <TextView
+        android:id="@+id/textCounter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0"
+        android:textSize="48sp"
+        android:layout_marginTop="32dp"
+        android:layout_marginBottom="64dp" />
+
+    <!-- Круглая кнопка -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/buttonClick"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:backgroundTint="#4CAF50"
+        android:gravity="center"
+        android:text="Жми!"
+        android:textColor="#FFFFFF"
+        android:textSize="24sp"
+        app:cornerRadius="100dp" />
+
+    <!--  ЭТО КЛЮЧЕВОЙ ЭЛЕМЕНТ: "Невидимая пружина", толкающая кнопку вниз -->
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <!-- Кнопка "Купоны" — теперь в самом низу -->
+    <Button
+        android:id="@+id/buttonGoToSecond"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Купоны" />
+    <Button
+        android:id="@+id/buttonSettings"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Настройки"
+        android:layout_marginTop="8dp" />
+
+</LinearLayout>

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="12dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="🎁 Каталог купонов"
+        android:textSize="22sp"
+        android:gravity="center"
+        android:padding="12dp"
+        android:background="#E8F5E9" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <include layout="@layout/item_dish" android:id="@+id/item1" />
+            <include layout="@layout/item_dish" android:id="@+id/item2" />
+            <include layout="@layout/item_dish" android:id="@+id/item3" />
+            <include layout="@layout/item_dish" android:id="@+id/item4" />
+            <include layout="@layout/item_dish" android:id="@+id/item5" />
+            <include layout="@layout/item_dish" android:id="@+id/item6" />
+
+        </LinearLayout>
+    </ScrollView>
+
+    <TextView
+        android:id="@+id/textBadges"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Достижения"
+        android:padding="12dp"
+        android:background="#F1F8E9"
+        android:layout_marginTop="16dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="8dp">
+
+        <Button
+            android:id="@+id/buttonExport"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Резервная копия" />
+
+        <Button
+            android:id="@+id/buttonBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Назад"
+            android:layout_marginStart="16dp" />
+
+    </LinearLayout>
+
+</LinearLayout>
