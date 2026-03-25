@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/rounded_top_background"
+    android:padding="24dp"
+    android:gravity="center_horizontal">
+
+    <!-- Заголовок -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Ваш купон готов!"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="#333333"
+        android:layout_marginBottom="8dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Покажите этот код на кассе"
+        android:textSize="14sp"
+        android:textColor="#666666"
+        android:layout_marginBottom="24dp"/>
+
+    <!-- Место для QR кода -->
+    <ImageView
+        android:id="@+id/qrCodeImage"
+        android:layout_width="250dp"
+        android:layout_height="250dp"
+        android:background="#FFFFFF"
+        android:padding="10dp"
+        android:layout_marginBottom="20dp"/>
+
+    <!-- Текст промокода -->
+    <TextView
+        android:id="@+id/promoCodeText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="CODE123"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:textColor="#4CAF50"
+        android:fontFamily="monospace"
+        android:layout_marginBottom="24dp"/>
+
+    <!-- Кнопка закрытия / копирования -->
+    <Button
+        android:id="@+id/btnCloseQr"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Скопировать и закрыть"
+        android:backgroundTint="#673AB7"
+        android:textColor="#FFFFFF"/>
+
+</LinearLayout>

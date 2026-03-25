@@ -1,53 +1,118 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<androidx.drawerlayout.widget.DrawerLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/a"
-    android:orientation="vertical"
-    android:gravity="center_horizontal"
-    android:padding="32dp">
+    android:fitsSystemWindows="false">
 
-    <!-- Счётчик вверху -->
-    <TextView
-        android:id="@+id/textCounter"
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <!-- 1. ОСНОВНОЙ КОНТЕНТ (Фон и кнопки кликера) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/a"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:paddingTop="80dp"
+            android:paddingLeft="32dp"
+            android:paddingRight="32dp"
+            android:paddingBottom="32dp">
+
+            <!-- Счётчик -->
+            <TextView
+                android:id="@+id/textCounter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textColor="#FFFFFF"
+                android:textSize="48sp"
+                android:textStyle="bold"
+                android:shadowColor="#000000"
+                android:shadowDx="1"
+                android:shadowDy="1"
+                android:shadowRadius="2"
+                android:layout_marginBottom="64dp" />
+
+            <!-- Круглая кнопка ЖМИ -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonClick"
+                android:layout_width="200dp"
+                android:layout_height="200dp"
+                android:backgroundTint="#4CAF50"
+                android:gravity="center"
+                android:text="Жми!"
+                android:textColor="#FFFFFF"
+                android:textSize="24sp"
+                app:cornerRadius="100dp" />
+
+            <!-- Пружина -->
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <!-- Кнопка КАТАЛОГ -->
+            <Button
+                android:id="@+id/buttonGoToSecond"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Каталог купонов"
+                android:backgroundTint="#673AB7"
+                android:textColor="#FFFFFF"
+                android:layout_marginBottom="16dp"/>
+        </LinearLayout>
+
+        <!-- 2. ВЕРХНЯЯ ПАНЕЛЬ: Меню (слева) + Корзина (справа) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingTop="16dp"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:background="@android:color/transparent">
+
+            <!-- Слева: Toolbar для кнопки меню (гамбургер) -->
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:minHeight="?attr/actionBarSize"
+                app:navigationIcon="@android:drawable/ic_menu_sort_by_size" />
+
+            <!-- Справа: КНОПКА КОРЗИНЫ -->
+            <Button
+                android:id="@+id/btnCartTop"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🛒 0"
+                android:textSize="14sp"
+                android:backgroundTint="#673AB7"
+                android:textColor="#FFFFFF"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:layout_marginStart="8dp"/>
+        </LinearLayout>
+
+    </FrameLayout>
+
+    <!-- 3. ВЫЕЗЖАЮЩЕЕ МЕНЮ -->
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/nav_view"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="0"
-        android:textSize="48sp"
-        android:layout_marginTop="32dp"
-        android:layout_marginBottom="64dp" />
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:fitsSystemWindows="true"
+        app:headerLayout="@layout/nav_header"
+        app:menu="@menu/drawer_menu" />
 
-    <!-- Круглая кнопка -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/buttonClick"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:backgroundTint="#4CAF50"
-        android:gravity="center"
-        android:text="Жми!"
-        android:textColor="#FFFFFF"
-        android:textSize="24sp"
-        app:cornerRadius="100dp" />
-
-    <!--  ЭТО КЛЮЧЕВОЙ ЭЛЕМЕНТ: "Невидимая пружина", толкающая кнопку вниз -->
-    <View
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
-
-    <!-- Кнопка "Купоны" — теперь в самом низу -->
-    <Button
-        android:id="@+id/buttonGoToSecond"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Купоны" />
-    <Button
-        android:id="@+id/buttonSettings"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Настройки"
-        android:layout_marginTop="8dp" />
-
-</LinearLayout>
+</androidx.drawerlayout.widget.DrawerLayout>

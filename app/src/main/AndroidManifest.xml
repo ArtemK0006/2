@@ -8,9 +8,9 @@
         android:label="@string/app_name"
         android:theme="@style/Theme._1">
 
-        <!-- Главный экран -->
+        <!-- 1. ГЛАВНЫЙ ЭКРАН: Вход (Login) -->
         <activity
-            android:name=".MainActivity"
+            android:name=".LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -18,11 +18,20 @@
             </intent-filter>
         </activity>
 
-        <!-- Каталог купонов -->
+        <!-- 2. Экран регистрации -->
+        <activity android:name=".RegisterActivity" />
+
+        <!-- 3. Главный экран кликера (после входа) -->
+        <activity android:name=".MainActivity" />
+
+        <!-- 4. Каталог купонов (SecondActivity) -->
         <activity android:name=".SecondActivity" />
 
-        <!-- Настройки (если добавлены) -->
+        <!-- 5. Настройки -->
         <activity android:name=".SettingsActivity" />
+
+        <!-- 6. 🛒 НОВЫЙ ЭКРАН: КОРЗИНА (Обязательно добавь эту строку!) -->
+        <activity android:name=".CartActivity" />
 
     </application>
 

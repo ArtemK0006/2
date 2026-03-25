@@ -1,85 +1,126 @@
 package com.example.a1
 
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.*
+import android.widget.Button
+import android.widget.ImageView
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class SecondActivity : AppCompatActivity() {
 
-    private data class Dish(
-        val name: String,
-        val imageRes: Int,
-        val goal: Int,
-        val promo: String
-    )
+    // Глобальный список корзины (доступен из MainActivity)
+    companion object {
+        val cartItems = mutableListOf<CartCoupon>()
+    }
+
+    private lateinit var database: AppDatabase
+    private lateinit var dao: UserDao
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_second)
+
+        // Проверка: есть ли файл разметки
+        try {
+            setContentView(R.layout.activity_second)
+        } catch (e: Exception) {
+            Toast.makeText(this, "Ошибка загрузки экрана: ${e.message}", Toast.LENGTH_LONG).show()
+            e.printStackTrace()
+            finish()
+            return
+        }
+
+        try {
+            database = AppDatabase.getDatabase(this)
+            dao = database.userDao()
+        } catch (e: Exception) {
+            Toast.makeText(this, "Ошибка БД: ${e.message}", Toast.LENGTH_LONG).show()
+            finish()
+            return
+        }
 
         val clickCount = intent.getIntExtra("clickCount", 0)
 
-        val dishes = listOf(
-            Dish("Яйцо шоколадное с подарком - 30% Скидка!", R.drawable.b, 100, "DESSERT100"),
-            Dish("Напиток сывороточный молочный с соком клубника-лайм-мята - 45% Скидка!", R.drawable.c, 500, "DRINK500"),
-            Dish("Сорбет Гранат - 50% Скидка!", R.drawable.d, 1000, "COLLECTED1K"),
-            Dish("Ягодный пунш - 25% Скидка!", R.drawable.e, 3000, "PUNCH3K"),
-            Dish("Ролл сливочный с огурцом - 35% Скидка!", R.drawable.f, 10000, "ROLL10K"),
-            Dish("Раф соленая карамель - 70% Скидка!", R.drawable.g, 50000, "RAF50K")
-        )
-
-        val itemIds = listOf(
+        // ID контейнеров товаров
+        val containerIds = listOf(
             R.id.item1, R.id.item2, R.id.item3,
             R.id.item4, R.id.item5, R.id.item6
         )
 
-        for (i in dishes.indices) {
-            val container = findViewById<View>(itemIds[i])
-            val image = container.findViewById<ImageView>(R.id.imageDish)
-            val name = container.findViewById<TextView>(R.id.textDishName)
-            val goalText = container.findViewById<TextView>(R.id.textDishGoal)
-            val promoText = container.findViewById<TextView>(R.id.textPromoCode)
-            val actionBtn = container.findViewById<Button>(R.id.buttonAction)
+        // Загрузка товаров
+        CoroutineScope(Dispatchers.Main).launch {
+            try {
+                val products = withContext(Dispatchers.IO) {
+                    dao.getAllProducts()
+                }
+                displayProducts(products, clickCount, containerIds)
+            } catch (e: Exception) {
+                Toast.makeText(this@SecondActivity, "Ошибка загрузки товаров: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }
 
-            val dish = dishes[i]
-            image.setImageResource(dish.imageRes)
-            name.text = dish.name
+        // Кнопка НАЗАД
+        val btnBack = findViewById<Button>(R.id.buttonBack)
+        btnBack?.setOnClickListener {
+            setResult(RESULT_CANCELED)
+            finish()
+        }
 
-            if (clickCount >= dish.goal) {
-                goalText.text = "Готово! Нажми «Получить»"
+    }
+
+    private fun displayProducts(products: List<Product>, clickCount: Int, containerIds: List<Int>) {
+        for (i in products.indices) {
+            if (i >= containerIds.size) break
+
+            val product = products[i]
+            val container = findViewById<View>(containerIds[i])
+
+            // Безопасное получение элементов внутри карточки
+            val image = container.findViewById<ImageView?>(R.id.imageDish)
+            val name = container.findViewById<TextView?>(R.id.textDishName)
+            val goalText = container.findViewById<TextView?>(R.id.textDishGoal)
+            val actionBtn = container.findViewById<Button?>(R.id.buttonAction)
+
+            // Если хоть одного элемента нет — пропускаем эту карточку, чтобы не упасть
+            if (image == null || name == null || goalText == null || actionBtn == null) {
+                continue
+            }
+
+            image.setImageResource(product.imageResId)
+            name.text = product.name
+
+            if (clickCount >= product.goal) {
+                goalText.text = "Доступно!"
                 goalText.setTextColor(getColor(android.R.color.holo_green_dark))
-                actionBtn.text = "Получить"
+                actionBtn.text = "В корзину"
                 actionBtn.visibility = View.VISIBLE
 
                 actionBtn.setOnClickListener {
-                    // Копируем промокод
-                    val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                    val clip = ClipData.newPlainText("Промокод", dish.promo)
-                    clipboard.setPrimaryClip(clip)
-                    Toast.makeText(this, "Промокод скопирован!", Toast.LENGTH_SHORT).show()
+                    // Добавляем в корзину
+                    val coupon = CartCoupon(
+                        id = System.currentTimeMillis().toInt(),
+                        productName = product.name,
+                        promoCode = product.promoCode,
+                        qrData = product.promoCode
+                    )
+                    cartItems.add(coupon)
 
-                    // 👇 ГЛАВНОЕ: отправляем сигнал на сброс и закрываем экран
-                    val resultIntent = Intent()
-                    resultIntent.putExtra("shouldReset", true)
-                    setResult(RESULT_OK, resultIntent)
-                    finish()
+                    Toast.makeText(this, "${product.name} добавлен в корзину!", Toast.LENGTH_SHORT).show()
+
+                    // goalText.text = "Добавлено"
                 }
             } else {
-                val need = dish.goal - clickCount
+                val need = product.goal - clickCount
                 goalText.text = "Нужно ещё: $need кликов"
                 goalText.setTextColor(getColor(android.R.color.holo_red_dark))
                 actionBtn.visibility = View.GONE
             }
-        }
-
-        findViewById<Button>(R.id.buttonBack).setOnClickListener {
-            setResult(RESULT_CANCELED)
-            finish()
         }
     }
 }

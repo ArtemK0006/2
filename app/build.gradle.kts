@@ -1,18 +1,19 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id("kotlin-kapt")
 }
 
 android {
     namespace = "com.example.a1"
-    compileSdk {
-        version = release(36)
-    }
+
+    //  просто число, без версии release
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.example.a1"
         minSdk = 24
-        targetSdk = 36
+        targetSdk = 34 // Привели в соответствие с compileSdk
         versionCode = 1
         versionName = "1.0"
 
@@ -38,12 +39,31 @@ android {
 }
 
 dependencies {
+    // Стандартные библиотеки Android
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+
+    // Тесты
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+    // --- БИБЛИОТЕКИ ROOM  ---
+    val room_version = "2.6.1"
+
+    implementation("androidx.room:room-runtime:$room_version")
+
+    kapt("androidx.room:room-compiler:$room_version")
+
+    implementation("androidx.room:room-ktx:$room_version")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+
+    // БИБЛИОТЕКИ QR
+    implementation("com.google.zxing:core:3.5.2")
+    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
+
 }

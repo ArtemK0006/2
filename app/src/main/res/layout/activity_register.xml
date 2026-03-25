@@ -5,24 +5,24 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center"
-    android:padding="32dp">
+    android:padding="24dp">
 
     <ImageView
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:contentDescription="Login Image"
-        android:layout_marginBottom="32dp"/>
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:src="@drawable/login"
+        android:layout_marginBottom="24dp"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Авторизоваться"
-        android:textSize="32sp"
+        android:text="Регистрация"
+        android:textSize="28sp"
         android:textStyle="bold"
         android:layout_marginBottom="24dp"/>
 
     <EditText
-        android:id="@+id/editEmail"
+        android:id="@+id/editRegEmail"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Email"
@@ -30,39 +30,32 @@
         android:layout_marginBottom="16dp"/>
 
     <EditText
-        android:id="@+id/editPassword"
+        android:id="@+id/editRegUsername"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Password"
+        android:hint="Имя пользователя"
+        android:layout_marginBottom="16dp"/>
+
+    <EditText
+        android:id="@+id/editRegPassword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Пароль"
         android:inputType="textPassword"
         android:layout_marginBottom="24dp"/>
 
     <Button
-        android:id="@+id/btnLogin"
+        android:id="@+id/btnRegister"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Login"
-        android:textSize="18sp"/>
+        android:text="Продолжить"/>
 
-    <LinearLayout
+    <TextView
+        android:id="@+id/textGoToLogin"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="Уже есть аккаунт? Войти"
+        android:textColor="#2196F3"
         android:layout_marginTop="16dp"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:text="New to here? " />
-
-        <TextView
-            android:id="@+id/textGoToRegister"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Sign up"
-            android:textColor="#2196F3"
-            android:textStyle="bold"
-            android:clickable="true"/>
-    </LinearLayout>
-
+        android:clickable="true"/>
 </LinearLayout>
