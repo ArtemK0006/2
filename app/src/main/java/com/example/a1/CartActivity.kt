@@ -5,6 +5,8 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.Color
+import android.graphics.Typeface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -13,6 +15,7 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.zxing.BarcodeFormat
+import com.google.zxing.EncodeHintType
 import com.google.zxing.MultiFormatWriter
 import com.google.zxing.common.BitMatrix
 import kotlinx.coroutines.CoroutineScope
@@ -26,7 +29,7 @@ class CartActivity : AppCompatActivity() {
     private lateinit var emptyText: TextView
     private val adapterItems = mutableListOf<CartCoupon>()
     private lateinit var arrayAdapter: ArrayAdapter<CartCoupon>
-    private var bottomSheetDialog: BottomSheetDialog? = null
+    private var currentDialog: BottomSheetDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,33 +49,20 @@ class CartActivity : AppCompatActivity() {
 
                 val txtName = view.findViewById<TextView>(R.id.txtCartName)
                 val txtCode = view.findViewById<TextView>(R.id.txtCartCode)
-                val imgQr = view.findViewById<ImageView>(R.id.imgCartQr)
-                val btnCopy = view.findViewById<Button>(R.id.btnCartCopy)
+                val imgProduct = view.findViewById<ImageView>(R.id.imgCartProduct)
+
+                val btnShowQr = view.findViewById<Button>(R.id.btnCartCopy)
                 val btnRemove = view.findViewById<Button>(R.id.btnCartRemove)
 
                 txtName.text = coupon.productName
                 txtCode.text = "Код: ${coupon.promoCode}"
+                imgProduct.setImageResource(coupon.imageResId)
 
-                // Генерация маленького QR для списка
-                CoroutineScope(Dispatchers.Default).launch {
-                    try {
-                        val bitMatrix = MultiFormatWriter().encode(coupon.qrData, BarcodeFormat.QR_CODE, 200, 200)
-                        val bitmap = Bitmap.createBitmap(200, 200, Bitmap.Config.RGB_565)
-                        for (x in 0 until 200) {
-                            for (y in 0 until 200) {
-                                bitmap.setPixel(x, y, if (bitMatrix[x, y]) android.graphics.Color.BLACK else android.graphics.Color.WHITE)
-                            }
-                        }
-                        withContext(Dispatchers.Main) {
-                            imgQr.setImageBitmap(bitmap)
-                        }
-                    } catch (e: Exception) { e.printStackTrace() }
-                }
+                btnShowQr.text = "Показать QR"
+                btnShowQr.backgroundTintList = android.content.res.ColorStateList.valueOf(getColor(android.R.color.holo_blue_light))
 
-                // Кнопка "Показать и копировать" -> Открывает большую панель
-                btnCopy.text = "Показать" // Меняем текст кнопки
-                btnCopy.setOnClickListener {
-                    showQrBottomSheet(coupon.promoCode, coupon.productName, isFromCart = true)
+                btnShowQr.setOnClickListener {
+                    showLargeQrDialog(coupon)
                 }
 
                 btnRemove.setOnClickListener {
@@ -89,6 +79,67 @@ class CartActivity : AppCompatActivity() {
 
         listView.adapter = arrayAdapter
         loadCart()
+    }
+
+    // Функция показа  QR из XML
+    private fun showLargeQrDialog(coupon: CartCoupon) {
+        currentDialog = BottomSheetDialog(this)
+
+        // Загружаем красивый XML файл
+        val sheetView = layoutInflater.inflate(R.layout.bottom_sheet_qr, null)
+
+        val qrImage = sheetView.findViewById<ImageView>(R.id.qrCodeImage)
+        val promoText = sheetView.findViewById<TextView>(R.id.promoCodeText)
+        val btnClose = sheetView.findViewById<Button>(R.id.btnCloseQr)
+
+        // Устанавливаем текст промокода
+        promoText.text = coupon.promoCode
+
+        // Генерация QR кода
+        CoroutineScope(Dispatchers.Default).launch {
+            try {
+                val hints = mutableMapOf<EncodeHintType, Any>()
+                hints[EncodeHintType.MARGIN] = 1 // Маленькие поля вокруг
+
+                val bitMatrix: BitMatrix = MultiFormatWriter().encode(
+                    coupon.qrData,
+                    BarcodeFormat.QR_CODE,
+                    800, 800,
+                    hints
+                )
+
+                val width = bitMatrix.width
+                val height = bitMatrix.height
+                val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565)
+
+                for (x in 0 until width) {
+                    for (y in 0 until height) {
+                        bitmap.setPixel(x, y, if (bitMatrix[x, y]) Color.BLACK else Color.WHITE)
+                    }
+                }
+
+                withContext(Dispatchers.Main) {
+                    qrImage.setImageBitmap(bitmap)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@CartActivity, "Ошибка генерации QR", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
+        // Логика кнопки "Скопировать и закрыть"
+        btnClose.setOnClickListener {
+            val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clip = ClipData.newPlainText("Промокод", coupon.promoCode)
+            clipboard.setPrimaryClip(clip)
+            Toast.makeText(this, "Промокод скопирован!", Toast.LENGTH_SHORT).show()
+            currentDialog?.dismiss()
+        }
+
+        currentDialog?.setContentView(sheetView)
+        currentDialog?.show()
     }
 
     private fun loadCart() {
@@ -108,67 +159,8 @@ class CartActivity : AppCompatActivity() {
         }
     }
 
-    // --- ФУНКЦИЯ ПОКАЗА БОЛЬШОЙ ПАНЕЛИ С QR (КАК В КАТАЛОГЕ) ---
-    private fun showQrBottomSheet(promoCode: String, dishName: String, isFromCart: Boolean) {
-        bottomSheetDialog = BottomSheetDialog(this)
-        val sheetView = layoutInflater.inflate(R.layout.bottom_sheet_qr, null)
-
-        val qrImage = sheetView.findViewById<ImageView>(R.id.qrCodeImage)
-        val promoText = sheetView.findViewById<TextView>(R.id.promoCodeText)
-        val btnClose = sheetView.findViewById<Button>(R.id.btnCloseQr)
-
-        promoText.text = promoCode
-        btnClose.text = if (isFromCart) "Скопировать и закрыть" else "Закрыть"
-
-        // Генерация большого QR кода
-        CoroutineScope(Dispatchers.Default).launch {
-            try {
-                val bitMatrix: BitMatrix = MultiFormatWriter().encode(
-                    promoCode,
-                    BarcodeFormat.QR_CODE,
-                    500, 500
-                )
-                val bitmap = Bitmap.createBitmap(500, 500, Bitmap.Config.RGB_565)
-                for (x in 0 until 500) {
-                    for (y in 0 until 500) {
-                        bitmap.setPixel(x, y, if (bitMatrix[x, y]) android.graphics.Color.BLACK else android.graphics.Color.WHITE)
-                    }
-                }
-
-                withContext(Dispatchers.Main) {
-                    qrImage.setImageBitmap(bitmap)
-                }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(this@CartActivity, "Ошибка генерации QR", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-
-        btnClose.setOnClickListener {
-            // Копируем код
-            val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-            val clip = ClipData.newPlainText("Промокод", promoCode)
-            clipboard.setPrimaryClip(clip)
-            Toast.makeText(this, "Промокод скопирован!", Toast.LENGTH_SHORT).show()
-
-            bottomSheetDialog?.dismiss()
-
-            // Если мы не из корзины (а из каталога), то еще и сбрасываем счетчик/закрываем активность
-            if (!isFromCart) {
-                val resultIntent = Intent()
-                resultIntent.putExtra("shouldReset", true)
-                setResult(RESULT_OK, resultIntent)
-                finish()
-            }
-        }
-
-        bottomSheetDialog?.setContentView(sheetView)
-        bottomSheetDialog?.show()
-    }
-
     override fun onDestroy() {
         super.onDestroy()
-        bottomSheetDialog?.dismiss()
+        currentDialog?.dismiss()
     }
 }

@@ -31,6 +31,10 @@
             <include layout="@layout/item_dish" android:id="@+id/item4" />
             <include layout="@layout/item_dish" android:id="@+id/item5" />
             <include layout="@layout/item_dish" android:id="@+id/item6" />
+            <include layout="@layout/item_dish" android:id="@+id/item7" />
+            <include layout="@layout/item_dish" android:id="@+id/item8" />
+            <include layout="@layout/item_dish" android:id="@+id/item9" />
+            <include layout="@layout/item_dish" android:id="@+id/item10" />
 
         </LinearLayout>
     </ScrollView>

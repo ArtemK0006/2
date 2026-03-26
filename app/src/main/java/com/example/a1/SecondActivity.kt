@@ -15,105 +15,108 @@ import kotlinx.coroutines.withContext
 
 class SecondActivity : AppCompatActivity() {
 
-    // Глобальный список корзины (доступен из MainActivity)
     companion object {
         val cartItems = mutableListOf<CartCoupon>()
     }
 
     private lateinit var database: AppDatabase
-    private lateinit var dao: UserDao
+    private lateinit var dao: ProductDao
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_second)
 
-        // Проверка: есть ли файл разметки
-        try {
-            setContentView(R.layout.activity_second)
-        } catch (e: Exception) {
-            Toast.makeText(this, "Ошибка загрузки экрана: ${e.message}", Toast.LENGTH_LONG).show()
-            e.printStackTrace()
-            finish()
-            return
-        }
-
-        try {
-            database = AppDatabase.getDatabase(this)
-            dao = database.userDao()
-        } catch (e: Exception) {
-            Toast.makeText(this, "Ошибка БД: ${e.message}", Toast.LENGTH_LONG).show()
-            finish()
-            return
-        }
+        // Инициализация БД
+        database = AppDatabase.getDatabase(this)
+        dao = database.productDao()
 
         val clickCount = intent.getIntExtra("clickCount", 0)
 
-        // ID контейнеров товаров
+
         val containerIds = listOf(
             R.id.item1, R.id.item2, R.id.item3,
-            R.id.item4, R.id.item5, R.id.item6
+            R.id.item4, R.id.item5, R.id.item6,
+            R.id.item7, R.id.item8, R.id.item9, R.id.item10
+
         )
 
-        // Загрузка товаров
+        // Загрузка данных ИЗ БАЗЫ ROOM
         CoroutineScope(Dispatchers.Main).launch {
             try {
-                val products = withContext(Dispatchers.IO) {
+                // Читаем данные из базы (это асинхронно)
+                val productsFromDb = withContext(Dispatchers.IO) {
                     dao.getAllProducts()
                 }
-                displayProducts(products, clickCount, containerIds)
+
+                if (productsFromDb.isEmpty()) {
+                    Toast.makeText(this@SecondActivity, "База пуста! Проверь AppDatabase.", Toast.LENGTH_LONG).show()
+                } else {
+                    Toast.makeText(this@SecondActivity, "Загружено товаров: ${productsFromDb.size}", Toast.LENGTH_SHORT).show()
+                }
+
+                // Отображаем товары на экране
+                displayProducts(productsFromDb, clickCount, containerIds)
+
             } catch (e: Exception) {
-                Toast.makeText(this@SecondActivity, "Ошибка загрузки товаров: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(this@SecondActivity, "Ошибка: ${e.message}", Toast.LENGTH_LONG).show()
+                e.printStackTrace()
             }
         }
 
-        // Кнопка НАЗАД
-        val btnBack = findViewById<Button>(R.id.buttonBack)
-        btnBack?.setOnClickListener {
+        // Кнопка Назад
+        findViewById<Button>(R.id.buttonBack)?.setOnClickListener {
             setResult(RESULT_CANCELED)
             finish()
         }
-
     }
 
     private fun displayProducts(products: List<Product>, clickCount: Int, containerIds: List<Int>) {
+        // Проходимся по всем товарам из базы
         for (i in products.indices) {
-            if (i >= containerIds.size) break
+            // Если товаров в базе больше, чем контейнеров в XML - останавливаемся
+            if (i >= containerIds.size) {
+                Toast.makeText(this, "Внимание: товаров больше, чем мест на экране!", Toast.LENGTH_LONG).show()
+                break
+            }
 
             val product = products[i]
-            val container = findViewById<View>(containerIds[i])
 
-            // Безопасное получение элементов внутри карточки
+            // Безопасно находим контейнер
+            val container = findViewById<View?>(containerIds[i]) ?: continue
+
             val image = container.findViewById<ImageView?>(R.id.imageDish)
             val name = container.findViewById<TextView?>(R.id.textDishName)
             val goalText = container.findViewById<TextView?>(R.id.textDishGoal)
             val actionBtn = container.findViewById<Button?>(R.id.buttonAction)
 
-            // Если хоть одного элемента нет — пропускаем эту карточку, чтобы не упасть
-            if (image == null || name == null || goalText == null || actionBtn == null) {
-                continue
-            }
+            if (image == null || name == null || goalText == null || actionBtn == null) continue
 
+            // ЗАПОЛНЯЕМ ДАННЫМИ ИЗ БАЗЫ
             image.setImageResource(product.imageResId)
             name.text = product.name
 
             if (clickCount >= product.goal) {
                 goalText.text = "Доступно!"
                 goalText.setTextColor(getColor(android.R.color.holo_green_dark))
-                actionBtn.text = "В корзину"
+                actionBtn.text = "Забрать"
                 actionBtn.visibility = View.VISIBLE
 
                 actionBtn.setOnClickListener {
-                    // Добавляем в корзину
                     val coupon = CartCoupon(
                         id = System.currentTimeMillis().toInt(),
                         productName = product.name,
                         promoCode = product.promoCode,
-                        qrData = product.promoCode
+                        qrData = product.promoCode,
+                        imageResId = product.imageResId
                     )
                     cartItems.add(coupon)
+                    Toast.makeText(this, "${product.name} в корзине!", Toast.LENGTH_SHORT).show()
 
-                    Toast.makeText(this, "${product.name} добавлен в корзину!", Toast.LENGTH_SHORT).show()
-
-                    // goalText.text = "Добавлено"
+                    val newCount = clickCount - product.goal
+                    val resultIntent = Intent()
+                    resultIntent.putExtra("newClickCount", newCount)
+                    setResult(RESULT_OK, resultIntent)
+                    finish()
                 }
             } else {
                 val need = product.goal - clickCount

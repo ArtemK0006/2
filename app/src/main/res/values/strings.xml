@@ -2,5 +2,4 @@
     <string name="app_name">Мой Кликер</string>
     <string name="open_nav">Открыть меню</string>
     <string name="close_nav">Закрыть меню</string>
-    <!-- остальные строки -->
 </resources>

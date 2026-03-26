@@ -37,7 +37,7 @@ class RegisterActivity : AppCompatActivity() {
                 val editor = prefs.edit()
                 editor.putString(KEY_LOGIN, email) // Сохраняем email как логин
                 editor.putString(KEY_PASS, password) // Сохраняем пароль
-                editor.apply() // Применяем изменения
+                editor.apply()
 
                 Toast.makeText(this, "Аккаунт создан! Теперь войдите.", Toast.LENGTH_LONG).show()
 

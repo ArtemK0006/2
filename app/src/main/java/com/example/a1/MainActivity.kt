@@ -47,12 +47,10 @@ class MainActivity : AppCompatActivity() {
         drawerLayout.addDrawerListener(toggle)
         toggle.syncState()
 
-
+        //  Устанавливаем ширину
         val displayMetrics = DisplayMetrics()
         windowManager.defaultDisplay.getMetrics(displayMetrics)
         val screenWidth = displayMetrics.widthPixels
-
-        //  ширины экрана
         val oneThirdWidth = (screenWidth * 0.60).toInt()
 
         val params = navView.layoutParams
@@ -108,20 +106,47 @@ class MainActivity : AppCompatActivity() {
         buttonGoToSecond.setOnClickListener {
             val intent = Intent(this, SecondActivity::class.java)
             intent.putExtra("clickCount", count)
+            // Используем startActivityForResult, чтобы получить результат (новые клики)
             startActivityForResult(intent, 100)
         }
     }
 
-    // Обновляем счетчик корзины при возврате
+    // Обновляем счетчик корзины при возврате на экран
     override fun onResume() {
         super.onResume()
         updateCartCount()
     }
 
+    //  ВЫЧИТАНИЕ КЛИКОВ
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == 100 && resultCode == RESULT_OK) {
+            // Проверяем, пришло ли новое количество кликов
+            if (data?.hasExtra("newClickCount") == true) {
+                // Получаем новое число (старое минус цена товара)
+                val newCount = data.getIntExtra("newClickCount", 0)
+                count = newCount
+                saveCount()
+                textCounter.text = count.toString()
+                Toast.makeText(this, "Купон получен! Осталось кликов: $count", Toast.LENGTH_SHORT).show()
+            }
+            // Запасной вариант: если вдруг пришел сигнал полного сброса
+            else if (data?.getBooleanExtra("shouldReset", false) == true) {
+                count = 0
+                saveCount()
+                textCounter.text = "0"
+                Toast.makeText(this, "Счётчик сброшен", Toast.LENGTH_SHORT).show()
+            }
+        }
+        // Обновляем кнопку корзины
+        updateCartCount()
+    }
+
     private fun updateCartCount() {
-        val count = SecondActivity.cartItems.size
-        if (count > 0) {
-            btnCart.text = "🛒 $count"
+        val cartSize = SecondActivity.cartItems.size
+        if (cartSize > 0) {
+            btnCart.text = "🛒 $cartSize"
             btnCart.visibility = View.VISIBLE
         } else {
             btnCart.text = "🛒 0"
@@ -135,20 +160,6 @@ class MainActivity : AppCompatActivity() {
         } else {
             super.onBackPressed()
         }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 100 && resultCode == RESULT_OK) {
-            val shouldReset = data?.getBooleanExtra("shouldReset", false) == true
-            if (shouldReset) {
-                count = 0
-                saveCount()
-                textCounter.text = "0"
-                Toast.makeText(this, "Купон получен! Счётчик сброшен.", Toast.LENGTH_SHORT).show()
-            }
-        }
-        updateCartCount()
     }
 
     private fun saveCount() {
